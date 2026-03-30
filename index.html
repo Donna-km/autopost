@@ -664,7 +664,7 @@
     if (response.ok) {
       const result = await response.json();
       console.log('Regenerated content from n8n:', result);
-      generatedContent = result;
+      generatedContent = Array.isArray(result) ? result[0] : result;
       displayExistingResult();
     } else {
       console.error('Error response from n8n:', response.status);
@@ -734,7 +734,7 @@ async function submitExistingForm() {
       console.log('Successfully sent to n8n, response:', result);
 
       // Store the generated content from n8n
-      generatedContent = result;
+generatedContent = Array.isArray(result) ? result[0] : result;
 
       // Display the results with uploaded file and generated captions
       displayExistingResult();
@@ -820,29 +820,46 @@ async function submitExistingForm() {
     }
   }
 
-  // Update captions from n8n if available
+    const selectedPlatforms = Array.from(
+    document.querySelectorAll('.existing-platform.selected')
+  ).map(btn => btn.dataset.platform || '');
+
+  const tiktokContainer = document.getElementById('tiktok-caption');
+  const instagramContainer = document.getElementById('instagram-caption');
+  const youtubeContainer = document.getElementById('youtube-caption');
+
+  const captionTiktok = document.getElementById('caption-tiktok');
+  const captionInstagram = document.getElementById('caption-instagram');
+  const captionYoutube = document.getElementById('caption-youtube');
+  const hashtagsText = document.getElementById('hashtags-text');
+
+  if (tiktokContainer) {
+    tiktokContainer.classList.toggle('hidden', !selectedPlatforms.includes('tiktok'));
+  }
+
+  if (instagramContainer) {
+    instagramContainer.classList.toggle('hidden', !selectedPlatforms.includes('instagram'));
+  }
+
+  if (youtubeContainer) {
+    youtubeContainer.classList.toggle('hidden', !selectedPlatforms.includes('youtube'));
+  }
+
   if (generatedContent && generatedContent.captions) {
-    const captionTiktok = document.getElementById('caption-tiktok');
-    const captionInstagram = document.getElementById('caption-instagram');
-    const captionYoutube = document.getElementById('caption-youtube');
-    const youtubeContainer = document.getElementById('youtube-caption');
-    const hashtagsText = document.getElementById('hashtags-text');
-
-    if (generatedContent.captions.tiktok && captionTiktok) {
-      captionTiktok.textContent = generatedContent.captions.tiktok;
+    if (captionTiktok) {
+      captionTiktok.textContent = generatedContent.captions.tiktok || 'No caption';
     }
 
-    if (generatedContent.captions.instagram && captionInstagram) {
-      captionInstagram.textContent = generatedContent.captions.instagram;
+    if (captionInstagram) {
+      captionInstagram.textContent = generatedContent.captions.instagram || 'No caption';
     }
 
-    if (generatedContent.captions.youtube && captionYoutube) {
-      captionYoutube.textContent = generatedContent.captions.youtube;
-      youtubeContainer.classList.remove('hidden');
+    if (captionYoutube) {
+      captionYoutube.textContent = generatedContent.captions.youtube || 'No caption';
     }
 
-    if (generatedContent.hashtags && hashtagsText) {
-      hashtagsText.textContent = generatedContent.hashtags;
+    if (hashtagsText) {
+      hashtagsText.textContent = generatedContent.hashtags || '';
     }
   }
 
