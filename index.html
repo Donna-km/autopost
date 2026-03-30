@@ -183,6 +183,15 @@
             <p class="text-charcoal leading-relaxed">This is your gentle reminder that rest is not a reward — it's a necessity. Take a breath. You're doing better than you think. 🤍✨</p>
            </div>
            <div class="p-5 rounded-xl bg-beige/50">
+  <div class="flex items-center gap-2 mb-3">
+    <i data-lucide="music" class="w-5 h-5 text-espresso"></i>
+    <span class="font-medium text-espresso">TikTok</span>
+  </div>
+  <p id="caption-tiktok" class="text-charcoal leading-relaxed">
+    Loading caption...
+  </p>
+</div>
+           <div class="p-5 rounded-xl bg-beige/50">
             <div class="flex items-center gap-2 mb-3"><i data-lucide="instagram" class="w-5 h-5 text-espresso"></i> <span class="font-medium text-espresso">Instagram Reels</span>
             </div>
             <p id="caption-instagram" class="text-charcoal leading-relaxed">Loading caption...</p>
@@ -538,6 +547,15 @@
          <svg class="w-4 h-4" viewbox="0 0 24 24" fill="currentColor">
           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
          </svg> TikTok </button> <button type="button" class="schedule-platform-btn px-3 py-1.5 rounded-full bg-beige text-sm font-medium text-cocoa flex items-center gap-2 cursor-pointer hover:bg-sand transition-colors" data-platform="instagram" onclick="updateSchedulePreview(event)"> <i data-lucide="instagram" class="w-4 h-4"></i> Instagram </button>
+ <button type="button" 
+  class="schedule-platform-btn px-3 py-1.5 rounded-full bg-beige text-sm font-medium text-cocoa flex items-center gap-2 cursor-pointer hover:bg-sand transition-colors" 
+  data-platform="youtube" 
+  onclick="updateSchedulePreview(event)">
+  
+  <i data-lucide="youtube" class="w-4 h-4"></i> 
+  YouTube
+</button>
+
        </div>
       </div><!-- Content Preview -->
       <div class="p-4 rounded-xl bg-beige/50">
@@ -764,71 +782,97 @@ async function submitExistingForm() {
 
     // Display results with uploaded file and generated captions
     function displayExistingResult() {
-      // Show uploaded media
-      if (selectedFile) {
-        const isVideo = selectedFile.type.startsWith('video/');
-        const isImage = selectedFile.type.startsWith('image/');
-        const mediaPreview = document.querySelector('#existing-result .aspect-video');
-        
-        if (mediaPreview) {
-          mediaPreview.innerHTML = '';
-          
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (isImage) {
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.style.width = '100%';
-              img.style.height = '100%';
-              img.style.objectFit = 'cover';
-              mediaPreview.appendChild(img);
-            } else if (isVideo) {
-              const video = document.createElement('video');
-              video.src = e.target.result;
-              video.style.width = '100%';
-              video.style.height = '100%';
-              video.style.objectFit = 'cover';
-              video.controls = true;
-              mediaPreview.appendChild(video);
-            }
-            
-            if (typeof lucide !== 'undefined') {
-              lucide.createIcons();
-            }
-          };
-          reader.readAsDataURL(selectedFile);
-        }
+  const mediaPreview = document.querySelector('#existing-result .aspect-video');
+
+  if (mediaPreview) {
+    mediaPreview.innerHTML = '';
+
+    // 1) Prefer file_url from backend / Cloudinary
+    if (generatedContent && generatedContent.file_url) {
+      const fileUrl = generatedContent.file_url;
+      const fileType =
+        generatedContent.file_type ||
+        selectedFile?.type ||
+        '';
+
+      if (fileType.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = fileUrl;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        mediaPreview.appendChild(img);
+      } else {
+        const video = document.createElement('video');
+        video.src = fileUrl;
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'cover';
+        video.controls = true;
+        mediaPreview.appendChild(video);
       }
-      
-      // Update captions from n8n if available
-      if (generatedContent && generatedContent.captions) {
-        const captionTiktok = document.getElementById('caption-tiktok');
-        const captionInstagram = document.getElementById('caption-instagram');
-        const captionYoutube = document.getElementById('caption-youtube');
-        const youtubeContainer = document.getElementById('youtube-caption');
-        const hashtagsText = document.getElementById('hashtags-text');
-        
-        if (generatedContent.captions.tiktok && captionTiktok) {
-          captionTiktok.textContent = generatedContent.captions.tiktok;
-        }
-        
-        if (generatedContent.captions.instagram && captionInstagram) {
-          captionInstagram.textContent = generatedContent.captions.instagram;
-        }
-        
-        if (generatedContent.captions.youtube && captionYoutube) {
-          captionYoutube.textContent = generatedContent.captions.youtube;
-          youtubeContainer.classList.remove('hidden');
-        }
-        
-        if (generatedContent.hashtags && hashtagsText) {
-          hashtagsText.textContent = generatedContent.hashtags;
-        }
-      }
-      
-      showExistingResult();
     }
 
+    // 2) Fallback to local uploaded file
+    else if (selectedFile) {
+      const isVideo = selectedFile.type.startsWith('video/');
+      const isImage = selectedFile.type.startsWith('image/');
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (isImage) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          mediaPreview.appendChild(img);
+        } else if (isVideo) {
+          const video = document.createElement('video');
+          video.src = e.target.result;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.objectFit = 'cover';
+          video.controls = true;
+          mediaPreview.appendChild(video);
+        }
+
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  }
+
+  // Update captions from n8n if available
+  if (generatedContent && generatedContent.captions) {
+    const captionTiktok = document.getElementById('caption-tiktok');
+    const captionInstagram = document.getElementById('caption-instagram');
+    const captionYoutube = document.getElementById('caption-youtube');
+    const youtubeContainer = document.getElementById('youtube-caption');
+    const hashtagsText = document.getElementById('hashtags-text');
+
+    if (generatedContent.captions.tiktok && captionTiktok) {
+      captionTiktok.textContent = generatedContent.captions.tiktok;
+    }
+
+    if (generatedContent.captions.instagram && captionInstagram) {
+      captionInstagram.textContent = generatedContent.captions.instagram;
+    }
+
+    if (generatedContent.captions.youtube && captionYoutube) {
+      captionYoutube.textContent = generatedContent.captions.youtube;
+      youtubeContainer.classList.remove('hidden');
+    }
+
+    if (generatedContent.hashtags && hashtagsText) {
+      hashtagsText.textContent = generatedContent.hashtags;
+    }
+  }
+
+  showExistingResult();
+}
     function showCreateResult() {
       document.getElementById('create-result').classList.remove('hidden');
       document.getElementById('create-result').scrollIntoView({ behavior: 'smooth' });
