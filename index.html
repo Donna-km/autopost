@@ -539,8 +539,9 @@
        <div class="grid grid-cols-2 gap-4">
         <div>
   <label class="block text-sm font-medium text-espresso mb-2">Date</label>
-  <input type="date" id="schedule-date" value="2024-12-18" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+  <input type="date" id="schedule-date" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
 </div>
+
 <div>
   <label class="block text-sm font-medium text-espresso mb-2">Time</label>
   <input type="time" id="schedule-time" value="09:00" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
@@ -564,10 +565,6 @@
 
        </div>
       </div><!-- Content Preview -->
-      <div class="p-4 rounded-xl bg-beige/50">
-       <p class="text-sm font-medium text-espresso mb-2">Content Preview</p>
-       <p id="schedule-preview-text" class="text-sm text-mocha line-clamp-3">This is your gentle reminder that rest is not a reward — it's a necessity. Take a breath. You're doing better than you think. 🤍✨</p>
-      </div>
      </div>
      <div class="p-6 bg-beige/30 border-t border-sand flex gap-3"><button onclick="closeScheduleModal()" class="flex-1 py-3 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors"> Back to Edit </button> <button onclick="confirmSchedule()" class="flex-1 btn-primary py-3 rounded-xl text-white text-sm font-medium"> Confirm Schedule </button>
      </div>
@@ -1056,14 +1053,15 @@ function setInlineButtonsEditing(editing) {
 
     // Schedule modal
     function openScheduleModal() {
-      document.getElementById('schedule-modal').classList.remove('hidden');
-      document.getElementById('schedule-modal').classList.add('flex');
-      // Set initial preview to TikTok
-      updateSchedulePreview();
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-    }
+  document.getElementById('schedule-modal').classList.remove('hidden');
+  document.getElementById('schedule-modal').classList.add('flex');
+
+  setDefaultScheduleValues();
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
 
     function closeScheduleModal() {
       document.getElementById('schedule-modal').classList.add('hidden');
@@ -2154,6 +2152,22 @@ function rescheduleQueueItem(id) {
   } catch (err) {
     console.error('Error deleting item:', err);
     alert('Error deleting item');
+  }
+}
+   function setDefaultScheduleValues() {
+  const dateInput = document.getElementById('schedule-date');
+  const timeInput = document.getElementById('schedule-time');
+
+  if (dateInput && !dateInput.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  if (timeInput && !timeInput.value) {
+    timeInput.value = '09:00';
   }
 }
    
