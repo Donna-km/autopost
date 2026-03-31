@@ -564,7 +564,7 @@
        <p id="schedule-preview-text" class="text-sm text-mocha line-clamp-3">This is your gentle reminder that rest is not a reward — it's a necessity. Take a breath. You're doing better than you think. 🤍✨</p>
       </div>
      </div>
-     <div class="p-6 bg-beige/30 border-t border-sand flex gap-3"><button onclick="closeScheduleModal()" class="flex-1 py-3 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors"> Back to Edit </button> <button onclick="closeScheduleModal()" class="flex-1 btn-primary py-3 rounded-xl text-white text-sm font-medium"> Confirm Schedule </button>
+     <div class="p-6 bg-beige/30 border-t border-sand flex gap-3"><button onclick="closeScheduleModal()" class="flex-1 py-3 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors"> Back to Edit </button> <button onclick="confirmSchedule()" class="flex-1 btn-primary py-3 rounded-xl text-white text-sm font-medium"> Confirm Schedule </button>
      </div>
     </div>
    </div>
@@ -1850,6 +1850,78 @@ function setInlineButtonsEditing(editing) {
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
+async function confirmSchedule() {
+  try {
+    // 🔥 เอา id จาก create flow
+    const id = generatedContent?.id;
+    if (!id) {
+      alert('Missing content ID');
+      return;
+    }
+
+    // 🔥 platforms
+    const platforms = Array.from(
+      document.querySelectorAll('.platform.selected')
+    ).map(btn => btn.dataset.platform);
+
+    // 🔥 captions
+    const caption_tiktok =
+      document.getElementById('caption-tiktok')?.textContent || '';
+
+    const caption_instagram =
+      document.getElementById('caption-instagram')?.textContent || '';
+
+    const caption_youtube =
+      document.getElementById('caption-youtube')?.textContent || '';
+
+    // 🔥 date + time
+    const date = document.getElementById('schedule-date')?.value;
+    const time = document.getElementById('schedule-time')?.value;
+
+    if (!date || !time) {
+      alert('Please select date and time');
+      return;
+    }
+
+    const schedule_datetime = `${date} ${time}:00`;
+
+    // 🔥 payload
+    const payload = {
+      id,
+      platforms,
+      caption_tiktok,
+      caption_instagram,
+      caption_youtube,
+      schedule_datetime
+    };
+
+    console.log('Schedule payload:', payload);
+
+    // 🔥 ยิงไป n8n
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/schedule', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    console.log('n8n response:', data);
+
+    if (data.success) {
+      alert('Scheduled successfully 🎉');
+      closeScheduleModal();
+    } else {
+      alert('Schedule failed: ' + (data.message || 'Unknown error'));
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert('Error scheduling post');
+  }
+}
+   
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e4726a5a1f42721',t:'MTc3NDg3NDA5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
