@@ -2008,9 +2008,9 @@ function renderQueue(items) {
             <i data-lucide="calendar" class="w-3 h-3"></i> ${escapeHtml(scheduleText)}
           </p>
         </div>
-        <div class="px-5 pb-5 flex gap-2">
+       <div class="px-5 pb-5 flex gap-2">
   <button onclick="openQueueItem('${safeId}')" 
-    class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">
+    class="${status === 'scheduled' ? 'flex-1' : 'flex-1'} py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">
     Open
   </button>
 
@@ -2020,6 +2020,11 @@ function renderQueue(items) {
       Reschedule
     </button>
   ` : ''}
+
+  <button onclick="deleteQueueItem('${safeId}')" 
+    class="${status === 'scheduled' ? 'flex-1' : 'flex-1'} py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 transition-colors">
+    Delete
+  </button>
 </div>
       </div>
     `;
@@ -2110,6 +2115,33 @@ function rescheduleQueueItem(id) {
 
     openScheduleModal();
   }, 300);
+}
+   async function deleteQueueItem(id) {
+  const item = queueItemsData.find(x => String(x.id) === String(id));
+  if (!item) return;
+
+  const ok = confirm(`Delete this content?\n\n${item.mood_topic || item.scene_hint || item.file_name || 'Untitled'}`);
+  if (!ok) return;
+
+  try {
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/delete-queue-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+
+    const data = await res.json();
+    console.log('delete response:', data);
+
+    if (data.success) {
+      loadQueue();
+    } else {
+      alert('Delete failed: ' + (data.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Error deleting item:', err);
+    alert('Error deleting item');
+  }
 }
    
    
