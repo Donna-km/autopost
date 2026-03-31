@@ -2008,10 +2008,12 @@ function renderQueue(items) {
             <i data-lucide="calendar" class="w-3 h-3"></i> ${escapeHtml(scheduleText)}
           </p>
         </div>
-        <div class="px-5 pb-5 flex gap-2">
-          <button onclick="editQueueItem('${safeId}')" class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Edit</button>
-          <button onclick="openQueueItem('${safeId}')" class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Open</button>
-        </div>
+        <div class="px-5 pb-5">
+  <button onclick="openQueueItem('${safeId}')" 
+    class="w-full py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">
+    Open
+  </button>
+</div>
       </div>
     `;
   }).join('');
