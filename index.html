@@ -874,43 +874,45 @@ generatedContent = Array.isArray(result) ? result[0] : result;
   }
 
   if (generatedContent && generatedContent.captions) {
-    const captionTiktokEdit = document.getElementById('caption-tiktok-edit');
-const captionInstagramEdit = document.getElementById('caption-instagram-edit');
-const captionYoutubeEdit = document.getElementById('caption-youtube-edit');
-const hashtagsTextEdit = document.getElementById('hashtags-text-edit');
+  const captionTiktokEdit = document.getElementById('caption-tiktok-edit');
+  const captionInstagramEdit = document.getElementById('caption-instagram-edit');
+  const captionYoutubeEdit = document.getElementById('caption-youtube-edit');
+  const hashtagsTextEdit = document.getElementById('hashtags-text-edit');
 
-if (captionTiktok) {
-  const value = generatedContent.captions.tiktok || 'No caption';
-  captionTiktok.textContent = value;
-  if (captionTiktokEdit) captionTiktokEdit.value = value;
+  if (captionTiktok) {
+    const value = generatedContent.captions.tiktok || 'No caption';
+    captionTiktok.textContent = value;
+    if (captionTiktokEdit) captionTiktokEdit.value = value;
+  }
+
+  if (captionInstagram) {
+    const value = generatedContent.captions.instagram || 'No caption';
+    captionInstagram.textContent = value;
+    if (captionInstagramEdit) captionInstagramEdit.value = value;
+  }
+
+  if (captionYoutube) {
+    const value = generatedContent.captions.youtube || 'No caption';
+    captionYoutube.textContent = value;
+    if (captionYoutubeEdit) captionYoutubeEdit.value = value;
+  }
+
+  if (hashtagsText) {
+    const value = generatedContent.hashtags || '';
+    hashtagsText.textContent = value;
+    if (hashtagsTextEdit) hashtagsTextEdit.value = value;
+  }
 }
 
-if (captionInstagram) {
-  const value = generatedContent.captions.instagram || 'No caption';
-  captionInstagram.textContent = value;
-  if (captionInstagramEdit) captionInstagramEdit.value = value;
-}
-
-if (captionYoutube) {
-  const value = generatedContent.captions.youtube || 'No caption';
-  captionYoutube.textContent = value;
-  if (captionYoutubeEdit) captionYoutubeEdit.value = value;
-}
-
-if (hashtagsText) {
-  const value = generatedContent.hashtags || '';
-  hashtagsText.textContent = value;
-  if (hashtagsTextEdit) hashtagsTextEdit.value = value;
-}
-
-// 👉 วางตรงนี้
+// 🔥 สำคัญ: อยู่นอก if
 if (typeof closeInlineEdit === 'function') {
   closeInlineEdit();
 }
 
-// 👉 แล้วค่อยเรียกแสดงผล
+// 🔥 แสดงผล
 showExistingResult();
 }
+   
    function enableInlineEdit() {
   if (!generatedContent) return;
 
