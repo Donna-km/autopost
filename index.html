@@ -675,6 +675,7 @@
 
     // Store generated content from n8n
     let generatedContent = null;
+    let queueItemsData = [];
     let lastFormData = null;
     let isInlineEditing = false;
     let inlineEditBackup = null;
@@ -1949,6 +1950,8 @@ function renderQueue(items) {
   const grid = document.getElementById('queue-grid');
   if (!grid) return;
 
+  queueItemsData = items;
+
   if (!items.length) {
     grid.innerHTML = `
       <div class="col-span-full bg-white rounded-2xl border border-sand p-8 text-center">
@@ -1963,6 +1966,7 @@ function renderQueue(items) {
     const type = item.content_type || '-';
     const status = (item.status || 'draft').toLowerCase();
     const scheduleText = item.schedule_datetime || 'Not scheduled';
+    const safeId = escapeHtml(item.id || '');
 
     const platforms = (item.platforms || '')
       .toString()
@@ -1977,11 +1981,25 @@ function renderQueue(items) {
       ${platforms.includes('youtube') ? `<i data-lucide="youtube" class="w-4 h-4 text-mocha"></i>` : ''}
     `;
 
-    return `
-      <div class="queue-card card-hover bg-white rounded-2xl border border-sand overflow-hidden">
+    const mediaPreview = item.file_url
+      ? `
+        <div class="aspect-video relative overflow-hidden">
+          ${String(item.file_type || '').startsWith('image/')
+            ? `<img src="${escapeHtml(item.file_url)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover">`
+            : `<video src="${escapeHtml(item.file_url)}" class="w-full h-full object-cover" muted playsinline preload="metadata"></video>`
+          }
+          <span class="absolute top-3 right-3 status-${escapeHtml(status)} text-xs font-medium px-2.5 py-1 rounded-full">${escapeHtml(status)}</span>
+        </div>
+      `
+      : `
         <div class="aspect-video bg-gradient-to-br from-taupe to-mocha relative">
           <span class="absolute top-3 right-3 status-${escapeHtml(status)} text-xs font-medium px-2.5 py-1 rounded-full">${escapeHtml(status)}</span>
         </div>
+      `;
+
+    return `
+      <div class="queue-card card-hover bg-white rounded-2xl border border-sand overflow-hidden">
+        ${mediaPreview}
         <div class="p-5">
           <h4 class="font-medium text-espresso mb-1 line-clamp-1">${escapeHtml(title)}</h4>
           <p class="text-sm text-mocha mb-3">${escapeHtml(type)}</p>
@@ -1991,8 +2009,8 @@ function renderQueue(items) {
           </p>
         </div>
         <div class="px-5 pb-5 flex gap-2">
-          <button class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Edit</button>
-          <button class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Open</button>
+          <button onclick="editQueueItem('${safeId}')" class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Edit</button>
+          <button onclick="openQueueItem('${safeId}')" class="flex-1 py-2 rounded-lg border border-sand text-sm font-medium hover:bg-beige transition-colors">Open</button>
         </div>
       </div>
     `;
