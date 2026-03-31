@@ -933,87 +933,134 @@ generatedContent = Array.isArray(result) ? result[0] : result;
     let currentEditData = null;
 
     function openEditPanel(event) {
-      // Check if event is passed from queue card button
-      let card = null;
-      
-      if (event && event.target) {
-        card = event.target.closest('.queue-card');
-      }
-      
-      // If no card found, try to get from queue cards
-      if (!card) {
-        const cards = document.querySelectorAll('.queue-card');
-        card = cards[0]; // Default to first card
-      }
+  const editModal = document.getElementById('edit-modal') || createEditPanel();
 
-      if (!card) return;
+  const isFromQueueCard = !!(event && event.target && event.target.closest('.queue-card'));
+  const isFromExistingResult = !!(event && event.target && event.target.closest('#existing-result'));
 
-      const title = card.querySelector('h4')?.textContent || '';
-      const type = card.querySelector('p.text-sm.text-mocha')?.textContent || '';
-      const statusEl = card.querySelector('[class*="status-"]');
-      const status = statusEl?.textContent.trim() || '';
-      
-      // Get platform icons
-      const platformIcons = card.querySelectorAll('[data-lucide="instagram"], [data-lucide="youtube"], svg');
-      const platforms = [];
-      if (card.querySelector('svg')) platforms.push('tiktok');
-      if (card.querySelector('[data-lucide="instagram"]')) platforms.push('instagram');
-      if (card.querySelector('[data-lucide="youtube"]')) platforms.push('youtube');
+  let title = '';
+  let type = '';
+  let status = 'Draft';
+  let platforms = [];
+  let caption = '';
+  let hashtags = '';
 
-      currentEditData = { title, type, status, platforms };
+  // CASE 1: Open from Upload/Generated result
+  if (isFromExistingResult) {
+    type = document.getElementById('existing-content-type')?.value || '';
+    platforms = Array.from(
+      document.querySelectorAll('.existing-platform.selected')
+    ).map(btn => btn.dataset.platform || '');
 
-      const editModal = document.getElementById('edit-modal') || createEditPanel();
-      
-      // Populate form with current data
-      const titleInput = editModal.querySelector('input[placeholder="Enter title..."]');
-      if (titleInput) titleInput.value = title;
+    // default title from mood/topic or clip description
+    const moodTopic = document.getElementById('existing-mood-topic')?.value || '';
+    const clipDescription = document.getElementById('existing-clip-description')?.value || '';
+    title = moodTopic || clipDescription || 'Untitled content';
 
-      // Populate caption from generated content
-      const captionTextarea = editModal.querySelector('textarea[placeholder="Enter caption..."]');
-      if (captionTextarea && generatedContent) {
-        // Get the first platform's caption
-        const firstPlatform = platforms[0];
-        if (firstPlatform === 'tiktok' && generatedContent.captions?.tiktok) {
-          captionTextarea.value = generatedContent.captions.tiktok;
-        } else if (firstPlatform === 'instagram' && generatedContent.captions?.instagram) {
-          captionTextarea.value = generatedContent.captions.instagram;
-        } else if (firstPlatform === 'youtube' && generatedContent.captions?.youtube) {
-          captionTextarea.value = generatedContent.captions.youtube;
-        } else if (generatedContent.captions?.tiktok) {
-          captionTextarea.value = generatedContent.captions.tiktok;
-        }
-      }
-
-      // Populate hashtags from generated content
-      const hashtagsInput = editModal.querySelector('input[placeholder="e.g., #wellness #selfcare #mindfulness"]');
-      if (hashtagsInput && generatedContent?.hashtags) {
-        hashtagsInput.value = generatedContent.hashtags;
-      }
-
-      // Set content type buttons
-      const typeButtons = editModal.querySelectorAll('[data-type-btn]');
-      typeButtons.forEach(btn => {
-        btn.classList.remove('selected', 'bg-mocha', 'text-white');
-        if (btn.textContent.trim() === type) {
-          btn.classList.add('selected', 'bg-mocha', 'text-white');
-        }
-      });
-
-      // Set platform buttons based on current data
-      const platformButtons = editModal.querySelectorAll('[data-platform]');
-      platformButtons.forEach(btn => {
-        btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
-        if (platforms.includes(btn.dataset.platform)) {
-          btn.classList.add('selected', 'bg-mocha', 'text-white', 'border-mocha');
-        }
-      });
-
-      document.getElementById('edit-modal').classList.remove('hidden');
-      document.getElementById('edit-modal').classList.add('flex');
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+    if (generatedContent?.captions) {
+      if (platforms.includes('tiktok') && generatedContent.captions.tiktok) {
+        caption = generatedContent.captions.tiktok;
+      } else if (platforms.includes('instagram') && generatedContent.captions.instagram) {
+        caption = generatedContent.captions.instagram;
+      } else if (platforms.includes('youtube') && generatedContent.captions.youtube) {
+        caption = generatedContent.captions.youtube;
+      } else {
+        caption =
+          generatedContent.captions.tiktok ||
+          generatedContent.captions.instagram ||
+          generatedContent.captions.youtube ||
+          '';
       }
     }
+
+    hashtags = generatedContent?.hashtags || '';
+  }
+
+  // CASE 2: Open from Queue card
+  else if (isFromQueueCard) {
+    const card = event.target.closest('.queue-card');
+
+    title = card.querySelector('h4')?.textContent || '';
+    type = card.querySelector('p.text-sm.text-mocha')?.textContent || '';
+    const statusEl = card.querySelector('[class*="status-"]');
+    status = statusEl?.textContent.trim() || '';
+
+    platforms = [];
+    if (card.querySelector('svg')) platforms.push('tiktok');
+    if (card.querySelector('[data-lucide="instagram"]')) platforms.push('instagram');
+    if (card.querySelector('[data-lucide="youtube"]')) platforms.push('youtube');
+
+    if (generatedContent?.captions) {
+      if (platforms.includes('tiktok') && generatedContent.captions.tiktok) {
+        caption = generatedContent.captions.tiktok;
+      } else if (platforms.includes('instagram') && generatedContent.captions.instagram) {
+        caption = generatedContent.captions.instagram;
+      } else if (platforms.includes('youtube') && generatedContent.captions.youtube) {
+        caption = generatedContent.captions.youtube;
+      }
+    }
+
+    hashtags = generatedContent?.hashtags || '';
+  }
+
+  // CASE 3: fallback from current generated content only
+  else {
+    type = document.getElementById('existing-content-type')?.value || '';
+    title =
+      document.getElementById('existing-mood-topic')?.value ||
+      document.getElementById('existing-clip-description')?.value ||
+      'Untitled content';
+
+    platforms = Array.from(
+      document.querySelectorAll('.existing-platform.selected')
+    ).map(btn => btn.dataset.platform || '');
+
+    caption =
+      generatedContent?.captions?.tiktok ||
+      generatedContent?.captions?.instagram ||
+      generatedContent?.captions?.youtube ||
+      '';
+
+    hashtags = generatedContent?.hashtags || '';
+  }
+
+  currentEditData = { title, type, status, platforms, caption, hashtags };
+
+  // Fill modal inputs
+  const titleInput = editModal.querySelector('input[placeholder="Enter title..."]');
+  if (titleInput) titleInput.value = title;
+
+  const captionTextarea = editModal.querySelector('textarea[placeholder="Enter caption..."]');
+  if (captionTextarea) captionTextarea.value = caption;
+
+  const hashtagsInput = editModal.querySelector('input[placeholder="e.g., #wellness #selfcare #mindfulness"]');
+  if (hashtagsInput) hashtagsInput.value = hashtags;
+
+  // Set content type buttons
+  const typeButtons = editModal.querySelectorAll('[data-type-btn]');
+  typeButtons.forEach(btn => {
+    btn.classList.remove('selected', 'bg-mocha', 'text-white');
+    if (btn.textContent.trim() === type) {
+      btn.classList.add('selected', 'bg-mocha', 'text-white');
+    }
+  });
+
+  // Set platform buttons
+  const platformButtons = editModal.querySelectorAll('.platform-edit');
+  platformButtons.forEach(btn => {
+    btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
+    if (platforms.includes(btn.dataset.platform)) {
+      btn.classList.add('selected', 'bg-mocha', 'text-white', 'border-mocha');
+    }
+  });
+
+  document.getElementById('edit-modal').classList.remove('hidden');
+  document.getElementById('edit-modal').classList.add('flex');
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
 
     function closeEditPanel() {
       const modal = document.getElementById('edit-modal');
