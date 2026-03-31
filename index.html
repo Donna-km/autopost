@@ -1983,7 +1983,7 @@ function renderQueue(items) {
 
     const mediaPreview = item.file_url
       ? `
-        <div class="aspect-video relative overflow-hidden">
+        <div class="aspect-[9/16] relative overflow-hidden max-w-[220px] mx-auto">
           ${String(item.file_type || '').startsWith('image/')
             ? `<img src="${escapeHtml(item.file_url)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover">`
             : `<video src="${escapeHtml(item.file_url)}" class="w-full h-full object-cover" muted playsinline preload="metadata"></video>`
@@ -1992,9 +1992,11 @@ function renderQueue(items) {
         </div>
       `
       : `
-        <div class="aspect-video bg-gradient-to-br from-taupe to-mocha relative">
-          <span class="absolute top-3 right-3 status-${escapeHtml(status)} text-xs font-medium px-2.5 py-1 rounded-full">${escapeHtml(status)}</span>
-        </div>
+        <div class="aspect-[9/16] bg-gradient-to-br from-taupe to-mocha relative max-w-[220px] mx-auto">
+  <span class="absolute top-3 right-3 status-${escapeHtml(status)} text-xs font-medium px-2.5 py-1 rounded-full">
+    ${escapeHtml(status)}
+  </span>
+</div>
       `;
 
     return `
