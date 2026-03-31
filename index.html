@@ -170,7 +170,7 @@
          <div class="p-6 border-b border-sand">
           <h3 class="font-serif text-lg font-semibold text-espresso">Generated Content</h3>
          </div>
-         <div class="p-6 lg:p-8 space-y-6"><div class="aspect-[9/16] max-w-[260px] mx-auto rounded-xl bg-gradient-to-br from-taupe to-mocha flex items-center justify-center">
+         <div class="p-6 lg:p-8 space-y-6"><div id="existing-media-preview" class="aspect-[9/16] max-w-[260px] mx-auto rounded-xl bg-gradient-to-br from-taupe to-mocha flex items-center justify-center overflow-hidden">
   <i data-lucide="play-circle" class="w-16 h-16 text-white/80"></i>
 </div><!-- Caption Cards -->
 <div class="space-y-4">
@@ -795,7 +795,7 @@ if (response.ok) {
 
     // Display results with uploaded file and generated captions
     function displayExistingResult() {
-  const mediaPreview = document.querySelector('#existing-result .aspect-video');
+  const mediaPreview = document.getElementById('existing-media-preview');
 
   if (mediaPreview) {
     mediaPreview.innerHTML = '';
