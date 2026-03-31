@@ -180,8 +180,10 @@
       <span class="font-medium text-espresso">TikTok</span>
     </div>
     <p id="caption-tiktok" class="text-charcoal leading-relaxed">
-      Loading caption...
-    </p>
+  Loading caption...
+</p>
+<textarea id="caption-tiktok-edit" rows="4"
+  class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading caption...</textarea>
   </div>
 
   <div id="instagram-caption" class="p-5 rounded-xl bg-beige/50">
@@ -190,8 +192,10 @@
       <span class="font-medium text-espresso">Instagram Reels</span>
     </div>
     <p id="caption-instagram" class="text-charcoal leading-relaxed">
-      Loading caption...
-    </p>
+  Loading caption...
+</p>
+<textarea id="caption-instagram-edit" rows="4"
+  class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading caption...</textarea>
   </div>
 
   <div id="youtube-caption" class="hidden p-5 rounded-xl bg-beige/50">
@@ -200,17 +204,39 @@
       <span class="font-medium text-espresso">YouTube Shorts</span>
     </div>
     <p id="caption-youtube" class="text-charcoal leading-relaxed">
-      Loading caption...
-    </p>
+  Loading caption...
+</p>
+<textarea id="caption-youtube-edit" rows="4"
+  class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading caption...</textarea>
   </div>
 </div><!-- Hashtags -->
           <div id="hashtags-container" class="p-5 rounded-xl bg-beige/30">
            <p class="text-sm font-medium text-espresso mb-3">Suggested Hashtags</p>
            <p id="hashtags-text" class="text-sm text-mocha">Loading hashtags...</p>
+<textarea id="hashtags-text-edit" rows="3"
+  class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading hashtags...</textarea>
           </div>
-         </div><!-- Action Buttons -->
-         <div class="p-6 bg-beige/30 border-t border-sand flex flex-wrap gap-3"><button onclick="regenerateExisting()" class="px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Regenerate </button> <button onclick="openEditPanel(event)" class="px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2"> <i data-lucide="pencil" class="w-4 h-4"></i> Edit </button> <button onclick="openScheduleModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-medium flex items-center gap-2"> <i data-lucide="calendar" class="w-4 h-4"></i> Schedule Post </button>
-         </div>
+         </div><div class="p-6 bg-beige/30 border-t border-sand flex flex-wrap gap-3">
+  <button id="regenerate-btn" onclick="regenerateExisting()" class="px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2">
+    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Regenerate
+  </button>
+
+  <button id="edit-inline-btn" onclick="enableInlineEdit()" class="px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2">
+    <i data-lucide="pencil" class="w-4 h-4"></i> Edit
+  </button>
+
+  <button id="save-inline-btn" onclick="saveInlineEdit()" class="hidden px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2">
+    <i data-lucide="check" class="w-4 h-4"></i> Save
+  </button>
+
+  <button id="cancel-inline-btn" onclick="cancelInlineEdit()" class="hidden px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2">
+    <i data-lucide="x" class="w-4 h-4"></i> Cancel
+  </button>
+
+  <button id="schedule-btn" onclick="openScheduleModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-medium flex items-center gap-2">
+    <i data-lucide="calendar" class="w-4 h-4"></i> Schedule Post
+  </button>
+</div>
         </div>
        </div>
       </div>
@@ -642,6 +668,8 @@
     // Store generated content from n8n
     let generatedContent = null;
     let lastFormData = null;
+    let isInlineEditing = false;
+    let inlineEditBackup = null;
 
     // Regenerate content by sending to n8n again
     async function regenerateExisting() {
@@ -846,24 +874,165 @@ generatedContent = Array.isArray(result) ? result[0] : result;
   }
 
   if (generatedContent && generatedContent.captions) {
-    if (captionTiktok) {
-      captionTiktok.textContent = generatedContent.captions.tiktok || 'No caption';
-    }
+    const captionTiktokEdit = document.getElementById('caption-tiktok-edit');
+const captionInstagramEdit = document.getElementById('caption-instagram-edit');
+const captionYoutubeEdit = document.getElementById('caption-youtube-edit');
+const hashtagsTextEdit = document.getElementById('hashtags-text-edit');
 
-    if (captionInstagram) {
-      captionInstagram.textContent = generatedContent.captions.instagram || 'No caption';
-    }
+if (captionTiktok) {
+  const value = generatedContent.captions.tiktok || 'No caption';
+  captionTiktok.textContent = value;
+  if (captionTiktokEdit) captionTiktokEdit.value = value;
+}
 
-    if (captionYoutube) {
-      captionYoutube.textContent = generatedContent.captions.youtube || 'No caption';
-    }
+if (captionInstagram) {
+  const value = generatedContent.captions.instagram || 'No caption';
+  captionInstagram.textContent = value;
+  if (captionInstagramEdit) captionInstagramEdit.value = value;
+}
 
-    if (hashtagsText) {
-      hashtagsText.textContent = generatedContent.hashtags || '';
-    }
+if (captionYoutube) {
+  const value = generatedContent.captions.youtube || 'No caption';
+  captionYoutube.textContent = value;
+  if (captionYoutubeEdit) captionYoutubeEdit.value = value;
+}
+
+if (hashtagsText) {
+  const value = generatedContent.hashtags || '';
+  hashtagsText.textContent = value;
+  if (hashtagsTextEdit) hashtagsTextEdit.value = value;
+}
+
+// 👉 วางตรงนี้
+if (typeof closeInlineEdit === 'function') {
+  closeInlineEdit();
+}
+
+// 👉 แล้วค่อยเรียกแสดงผล
+showExistingResult();
+}
+   function enableInlineEdit() {
+  if (!generatedContent) return;
+
+  isInlineEditing = true;
+
+  inlineEditBackup = {
+    tiktok: document.getElementById('caption-tiktok')?.textContent || '',
+    instagram: document.getElementById('caption-instagram')?.textContent || '',
+    youtube: document.getElementById('caption-youtube')?.textContent || '',
+    hashtags: document.getElementById('hashtags-text')?.textContent || ''
+  };
+
+  toggleInlineField('caption-tiktok', 'caption-tiktok-edit');
+  toggleInlineField('caption-instagram', 'caption-instagram-edit');
+  toggleInlineField('caption-youtube', 'caption-youtube-edit');
+  toggleInlineField('hashtags-text', 'hashtags-text-edit');
+
+  setInlineButtonsEditing(true);
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
+
+function toggleInlineField(viewId, editId) {
+  const viewEl = document.getElementById(viewId);
+  const editEl = document.getElementById(editId);
+
+  if (!viewEl || !editEl) return;
+
+  editEl.value = viewEl.textContent.trim();
+  viewEl.classList.add('hidden');
+  editEl.classList.remove('hidden');
+}
+
+function saveInlineEdit() {
+  const tiktokView = document.getElementById('caption-tiktok');
+  const instagramView = document.getElementById('caption-instagram');
+  const youtubeView = document.getElementById('caption-youtube');
+  const hashtagsView = document.getElementById('hashtags-text');
+
+  const tiktokEdit = document.getElementById('caption-tiktok-edit');
+  const instagramEdit = document.getElementById('caption-instagram-edit');
+  const youtubeEdit = document.getElementById('caption-youtube-edit');
+  const hashtagsEdit = document.getElementById('hashtags-text-edit');
+
+  if (tiktokView && tiktokEdit) tiktokView.textContent = tiktokEdit.value.trim();
+  if (instagramView && instagramEdit) instagramView.textContent = instagramEdit.value.trim();
+  if (youtubeView && youtubeEdit) youtubeView.textContent = youtubeEdit.value.trim();
+  if (hashtagsView && hashtagsEdit) hashtagsView.textContent = hashtagsEdit.value.trim();
+
+  if (!generatedContent) generatedContent = {};
+  if (!generatedContent.captions) generatedContent.captions = {};
+
+  if (tiktokEdit) generatedContent.captions.tiktok = tiktokEdit.value.trim();
+  if (instagramEdit) generatedContent.captions.instagram = instagramEdit.value.trim();
+  if (youtubeEdit) generatedContent.captions.youtube = youtubeEdit.value.trim();
+  if (hashtagsEdit) generatedContent.hashtags = hashtagsEdit.value.trim();
+
+  closeInlineEdit();
+}
+
+function cancelInlineEdit() {
+  if (!inlineEditBackup) {
+    closeInlineEdit();
+    return;
   }
 
-  showExistingResult();
+  const tiktokView = document.getElementById('caption-tiktok');
+  const instagramView = document.getElementById('caption-instagram');
+  const youtubeView = document.getElementById('caption-youtube');
+  const hashtagsView = document.getElementById('hashtags-text');
+
+  if (tiktokView) tiktokView.textContent = inlineEditBackup.tiktok || '';
+  if (instagramView) instagramView.textContent = inlineEditBackup.instagram || '';
+  if (youtubeView) youtubeView.textContent = inlineEditBackup.youtube || '';
+  if (hashtagsView) hashtagsView.textContent = inlineEditBackup.hashtags || '';
+
+  closeInlineEdit();
+}
+
+function closeInlineEdit() {
+  isInlineEditing = false;
+
+  untoggleInlineField('caption-tiktok', 'caption-tiktok-edit');
+  untoggleInlineField('caption-instagram', 'caption-instagram-edit');
+  untoggleInlineField('caption-youtube', 'caption-youtube-edit');
+  untoggleInlineField('hashtags-text', 'hashtags-text-edit');
+
+  setInlineButtonsEditing(false);
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
+
+function untoggleInlineField(viewId, editId) {
+  const viewEl = document.getElementById(viewId);
+  const editEl = document.getElementById(editId);
+
+  if (!viewEl || !editEl) return;
+
+  viewEl.classList.remove('hidden');
+  editEl.classList.add('hidden');
+}
+
+function setInlineButtonsEditing(editing) {
+  const editBtn = document.getElementById('edit-inline-btn');
+  const saveBtn = document.getElementById('save-inline-btn');
+  const cancelBtn = document.getElementById('cancel-inline-btn');
+  const regenerateBtn = document.getElementById('regenerate-btn');
+  const scheduleBtn = document.getElementById('schedule-btn');
+
+  if (editBtn) editBtn.classList.toggle('hidden', editing);
+  if (saveBtn) saveBtn.classList.toggle('hidden', !editing);
+  if (cancelBtn) cancelBtn.classList.toggle('hidden', !editing);
+
+  if (regenerateBtn) regenerateBtn.disabled = editing;
+  if (scheduleBtn) scheduleBtn.disabled = editing;
+
+  if (regenerateBtn) regenerateBtn.classList.toggle('opacity-50', editing);
+  if (scheduleBtn) scheduleBtn.classList.toggle('opacity-50', editing);
 }
     function showCreateResult() {
       document.getElementById('create-result').classList.remove('hidden');
