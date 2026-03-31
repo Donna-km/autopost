@@ -753,23 +753,24 @@ async function submitExistingForm() {
 
   try {
     const response = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/create-post', {
-      method: 'POST',
-      body: formData
-    });
+  method: 'POST',
+  body: formData
+});
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Successfully sent to n8n, response:', result);
+if (response.ok) {
+  const result = await response.json();
+  console.log('Successfully sent to n8n, response:', result);
 
-      // Store the generated content from n8n
-generatedContent = Array.isArray(result) ? result[0] : result;
+  // Store the generated content from n8n
+  generatedContent = Array.isArray(result) ? result[0] : result;
+  console.log('generatedContent:', generatedContent);
 
-      // Display the results with uploaded file and generated captions
-      displayExistingResult();
-    } else {
-      console.error('Error response from n8n:', response.status);
-      displayExistingResult();
-    }
+  // Display the results with uploaded file and generated captions
+  displayExistingResult();
+} else {
+  console.error('Error response from n8n:', response.status);
+  displayExistingResult();
+}
   } catch (error) {
     console.error('Error sending to n8n:', error);
     displayExistingResult();
