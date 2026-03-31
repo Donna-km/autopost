@@ -2020,7 +2020,43 @@ function renderQueue(items) {
     lucide.createIcons();
   }
 }
+function editQueueItem(id) {
+  const item = queueItemsData.find(x => String(x.id) === String(id));
+  if (!item) return;
 
+  generatedContent = {
+    id: item.id,
+    file_url: item.file_url || '',
+    file_type: item.file_type || '',
+    captions: {
+      tiktok: item.caption_tiktok || '',
+      instagram: item.caption_instagram || '',
+      youtube: item.caption_youtube || ''
+    },
+    hashtags: item.hashtags || ''
+  };
+
+  document.getElementById('existing-content-type').value = item.content_type || '';
+  document.getElementById('existing-mood-topic').value = item.mood_topic || '';
+  document.getElementById('existing-clip-description').value = item.scene_hint || '';
+  document.getElementById('existing-additional-notes').value = '';
+
+  document.querySelectorAll('.existing-platform').forEach(btn => {
+    const isSelected = (item.platforms || '').toString().includes(btn.dataset.platform);
+    btn.classList.toggle('selected', isSelected);
+    btn.classList.toggle('bg-mocha', isSelected);
+    btn.classList.toggle('text-white', isSelected);
+    btn.classList.toggle('border-mocha', isSelected);
+  });
+
+  navigateTo('existing');
+  displayExistingResult();
+}
+
+function openQueueItem(id) {
+  editQueueItem(id);
+}
+   
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
