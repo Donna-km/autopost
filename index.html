@@ -696,7 +696,7 @@
   }
 
   try {
-    const response = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/create-post', {
+    const response = await fetch('https://primary-production-49d9.up.railway.app/webhook/create-post', {
       method: 'POST',
       body: lastFormData
     });
@@ -1916,7 +1916,7 @@ async function confirmSchedule() {
     console.log('Schedule payload:', payload);
 
     // 🔥 ยิงไป n8n
-    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/schedule', {
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/schedule', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -1942,7 +1942,7 @@ async function confirmSchedule() {
 
    async function loadQueue() {
   try {
-    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/queue-list');
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/queue-list');
     const data = await res.json();
 
     console.log('queue response:', data);
@@ -2145,7 +2145,7 @@ function rescheduleQueueItem(id) {
   if (!ok) return;
 
   try {
-    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/delete-queue-item', {
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/delete-queue-item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
