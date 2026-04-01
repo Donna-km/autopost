@@ -584,6 +584,7 @@
     let lastFormData = null;
     let isInlineEditing = false;
     let inlineEditBackup = null;
+    let generatedPlatforms = [];
 
     // Regenerate content by sending to n8n again
     async function regenerateExisting(event) {
@@ -639,6 +640,8 @@ async function submitExistingForm(event) {
   const selectedPlatforms = Array.from(
     document.querySelectorAll('.existing-platform.selected')
   ).map(btn => btn.dataset.platform || '');
+
+ generatedPlatforms = selectedPlatforms;
 
   const formData = new FormData();
   formData.append('data', selectedFile);
@@ -2089,10 +2092,12 @@ function rescheduleQueueItem(id) {
   }
 }
    function syncSchedulePlatformsFromExisting() {
-  const selectedPlatforms = Array.from(
-    document.querySelectorAll('.existing-platform.selected')
-  ).map(btn => btn.dataset.platform || '');
-
+  const selectedPlatforms = generatedPlatforms.length
+    ? generatedPlatforms
+    : Array.from(
+        document.querySelectorAll('.existing-platform.selected')
+      ).map(btn => btn.dataset.platform || '');
+    
   document.querySelectorAll('.schedule-platform-btn').forEach(btn => {
     const isSelected = selectedPlatforms.includes(btn.dataset.platform);
     btn.classList.toggle('bg-mocha', isSelected);
