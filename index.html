@@ -209,13 +209,7 @@
 <textarea id="caption-youtube-edit" rows="4"
   class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading caption...</textarea>
   </div>
-</div><!-- Hashtags -->
-          <div id="hashtags-container" class="p-5 rounded-xl bg-beige/30">
-           <p class="text-sm font-medium text-espresso mb-3">Suggested Hashtags</p>
-           <p id="hashtags-text" class="text-sm text-mocha">Loading hashtags...</p>
-<textarea id="hashtags-text-edit" rows="3"
-  class="hidden w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none">Loading hashtags...</textarea>
-          </div>
+</div>
          </div><div class="p-6 bg-beige/30 border-t border-sand flex flex-wrap gap-3">
   <button id="regenerate-btn" onclick="regenerateExisting(event)" class="px-5 py-2.5 rounded-xl border border-sand bg-white text-sm font-medium hover:bg-beige transition-colors flex items-center gap-2">
     <i data-lucide="refresh-cw" class="w-4 h-4"></i> Regenerate
@@ -818,30 +812,31 @@ async function submitExistingForm(event) {
   const captionTiktokEdit = document.getElementById('caption-tiktok-edit');
   const captionInstagramEdit = document.getElementById('caption-instagram-edit');
   const captionYoutubeEdit = document.getElementById('caption-youtube-edit');
-  const hashtagsTextEdit = document.getElementById('hashtags-text-edit');
+
+  const hashtags = (generatedContent.hashtags || '').trim();
+
+  function mergeCaptionWithHashtags(caption) {
+    const cleanCaption = (caption || '').trim();
+    if (!hashtags) return cleanCaption || 'No caption';
+    return cleanCaption ? `${cleanCaption} ${hashtags}` : hashtags;
+  }
 
   if (captionTiktok) {
-    const value = generatedContent.captions.tiktok || 'No caption';
+    const value = mergeCaptionWithHashtags(generatedContent.captions.tiktok);
     captionTiktok.textContent = value;
     if (captionTiktokEdit) captionTiktokEdit.value = value;
   }
 
   if (captionInstagram) {
-    const value = generatedContent.captions.instagram || 'No caption';
+    const value = mergeCaptionWithHashtags(generatedContent.captions.instagram);
     captionInstagram.textContent = value;
     if (captionInstagramEdit) captionInstagramEdit.value = value;
   }
 
   if (captionYoutube) {
-    const value = generatedContent.captions.youtube || 'No caption';
+    const value = mergeCaptionWithHashtags(generatedContent.captions.youtube);
     captionYoutube.textContent = value;
     if (captionYoutubeEdit) captionYoutubeEdit.value = value;
-  }
-
-  if (hashtagsText) {
-    const value = generatedContent.hashtags || '';
-    hashtagsText.textContent = value;
-    if (hashtagsTextEdit) hashtagsTextEdit.value = value;
   }
 }
 
@@ -860,16 +855,14 @@ showExistingResult();
   isInlineEditing = true;
 
   inlineEditBackup = {
-    tiktok: document.getElementById('caption-tiktok')?.textContent || '',
-    instagram: document.getElementById('caption-instagram')?.textContent || '',
-    youtube: document.getElementById('caption-youtube')?.textContent || '',
-    hashtags: document.getElementById('hashtags-text')?.textContent || ''
-  };
+  tiktok: document.getElementById('caption-tiktok')?.textContent || '',
+  instagram: document.getElementById('caption-instagram')?.textContent || '',
+  youtube: document.getElementById('caption-youtube')?.textContent || ''
+};
 
-  toggleInlineField('caption-tiktok', 'caption-tiktok-edit');
-  toggleInlineField('caption-instagram', 'caption-instagram-edit');
-  toggleInlineField('caption-youtube', 'caption-youtube-edit');
-  toggleInlineField('hashtags-text', 'hashtags-text-edit');
+toggleInlineField('caption-tiktok', 'caption-tiktok-edit');
+toggleInlineField('caption-instagram', 'caption-instagram-edit');
+toggleInlineField('caption-youtube', 'caption-youtube-edit');
 
   setInlineButtonsEditing(true);
 
@@ -893,17 +886,17 @@ function saveInlineEdit() {
   const tiktokView = document.getElementById('caption-tiktok');
   const instagramView = document.getElementById('caption-instagram');
   const youtubeView = document.getElementById('caption-youtube');
-  const hashtagsView = document.getElementById('hashtags-text');
+  
 
   const tiktokEdit = document.getElementById('caption-tiktok-edit');
   const instagramEdit = document.getElementById('caption-instagram-edit');
   const youtubeEdit = document.getElementById('caption-youtube-edit');
-  const hashtagsEdit = document.getElementById('hashtags-text-edit');
+  
 
   if (tiktokView && tiktokEdit) tiktokView.textContent = tiktokEdit.value.trim();
   if (instagramView && instagramEdit) instagramView.textContent = instagramEdit.value.trim();
   if (youtubeView && youtubeEdit) youtubeView.textContent = youtubeEdit.value.trim();
-  if (hashtagsView && hashtagsEdit) hashtagsView.textContent = hashtagsEdit.value.trim();
+  
 
   if (!generatedContent) generatedContent = {};
   if (!generatedContent.captions) generatedContent.captions = {};
@@ -911,7 +904,7 @@ function saveInlineEdit() {
   if (tiktokEdit) generatedContent.captions.tiktok = tiktokEdit.value.trim();
   if (instagramEdit) generatedContent.captions.instagram = instagramEdit.value.trim();
   if (youtubeEdit) generatedContent.captions.youtube = youtubeEdit.value.trim();
-  if (hashtagsEdit) generatedContent.hashtags = hashtagsEdit.value.trim();
+  
 
   closeInlineEdit();
 }
@@ -925,12 +918,11 @@ function cancelInlineEdit() {
   const tiktokView = document.getElementById('caption-tiktok');
   const instagramView = document.getElementById('caption-instagram');
   const youtubeView = document.getElementById('caption-youtube');
-  const hashtagsView = document.getElementById('hashtags-text');
-
+ 
   if (tiktokView) tiktokView.textContent = inlineEditBackup.tiktok || '';
   if (instagramView) instagramView.textContent = inlineEditBackup.instagram || '';
   if (youtubeView) youtubeView.textContent = inlineEditBackup.youtube || '';
-  if (hashtagsView) hashtagsView.textContent = inlineEditBackup.hashtags || '';
+ 
 
   closeInlineEdit();
 }
@@ -941,7 +933,7 @@ function closeInlineEdit() {
   untoggleInlineField('caption-tiktok', 'caption-tiktok-edit');
   untoggleInlineField('caption-instagram', 'caption-instagram-edit');
   untoggleInlineField('caption-youtube', 'caption-youtube-edit');
-  untoggleInlineField('hashtags-text', 'hashtags-text-edit');
+ 
 
   setInlineButtonsEditing(false);
 
