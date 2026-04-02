@@ -1892,7 +1892,7 @@ async function postNow() {
 
     console.log('Post now payload:', payload);
 
-    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/post-now', {
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/post-now', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
