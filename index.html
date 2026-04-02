@@ -426,7 +426,7 @@
      <div class="p-6 border-b border-sand flex items-center justify-between">
       <h3 class="font-serif text-xl font-semibold text-espresso">Schedule Post</h3><button onclick="closeScheduleModal()" class="p-2 -mr-2 rounded-xl hover:bg-beige transition-colors"> <i data-lucide="x" class="w-5 h-5 text-mocha"></i> </button>
      </div>
-     <div class="p-6 space-y-6"><!-- Post Now Option --> <button class="w-full p-4 rounded-xl border border-sand hover:bg-beige transition-colors text-left group">
+     <div class="p-6 space-y-6"><!-- Post Now Option --> <button onclick="postNow()" class="w-full p-4 rounded-xl border border-sand hover:bg-beige transition-colors text-left group">
        <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-xl bg-beige flex items-center justify-center group-hover:bg-sand transition-colors"><i data-lucide="send" class="w-6 h-6 text-cocoa"></i>
         </div>
@@ -1865,6 +1865,55 @@ async function confirmSchedule() {
   }
 }
 
+async function postNow() {
+  try {
+    const id = generatedContent?.id;
+    if (!id) {
+      alert('Missing content ID');
+      return;
+    }
+
+    const platforms = Array.from(
+      document.querySelectorAll('.schedule-platform-btn.bg-mocha')
+    ).map(btn => btn.dataset.platform);
+
+    if (!platforms.length) {
+      alert('Please select at least one platform');
+      return;
+    }
+
+    const payload = {
+      id,
+      platforms,
+      caption_tiktok: document.getElementById('caption-tiktok')?.textContent || '',
+      caption_instagram: document.getElementById('caption-instagram')?.textContent || '',
+      caption_youtube: document.getElementById('caption-youtube')?.textContent || ''
+    };
+
+    console.log('Post now payload:', payload);
+
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook-test/post-now', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    console.log('post-now response:', data);
+
+    if (data.success) {
+      alert('Posted successfully 🎉');
+      closeScheduleModal();
+      loadQueue();
+    } else {
+      alert('Post failed: ' + (data.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error posting now');
+  }
+}
+   
    async function loadQueue() {
   try {
     const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/queue-list');
