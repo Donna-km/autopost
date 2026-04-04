@@ -446,7 +446,7 @@
 
 <div>
   <label class="block text-sm font-medium text-espresso mb-2">Time</label>
-  <input type="time" id="schedule-time" value="09:00" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+  <input type="time" id="schedule-time" value="11:00" class="hidden">
 </div>
        </div>
       </div><!-- Selected Platforms -->
@@ -1813,14 +1813,13 @@ async function confirmSchedule() {
 
     // 🔥 date + time
     const date = document.getElementById('schedule-date')?.value;
-    const time = document.getElementById('schedule-time')?.value;
+   if (!date) {
+  alert('Please select date');
+  return;
+}
 
-    if (!date || !time) {
-      alert('Please select date and time');
-      return;
-    }
-
-    const schedule_datetime = `${date} ${time}:00`;
+// 🔥 fix เวลาเป็น 11:00 เลย
+const schedule_datetime = `${date} 11:00:00`;
 
     // 🔥 payload
     const payload = {
@@ -2147,7 +2146,7 @@ function rescheduleQueueItem(id) {
   }
 
   if (timeInput && !timeInput.value) {
-    timeInput.value = '09:00';
+    timeInput.value = '11:00';
   }
 }
    function syncSchedulePlatformsFromExisting() {
