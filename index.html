@@ -1795,9 +1795,11 @@ async function confirmSchedule() {
     }
 
     // 🔥 platforms
-    const platforms = Array.from(
-      document.querySelectorAll('.schedule-platform-btn.bg-mocha')
-    ).map(btn => btn.dataset.platform);
+    const platforms = generatedPlatforms.length
+  ? generatedPlatforms
+  : Array.from(
+      document.querySelectorAll('.existing-platform.selected')
+    ).map(btn => btn.dataset.platform || '');
 
     // 🔥 captions
     const caption_tiktok =
@@ -1865,9 +1867,11 @@ async function postNow() {
       return;
     }
 
-    const platforms = Array.from(
-      document.querySelectorAll('.schedule-platform-btn.bg-mocha')
-    ).map(btn => btn.dataset.platform);
+    const platforms = generatedPlatforms.length
+  ? generatedPlatforms
+  : Array.from(
+      document.querySelectorAll('.existing-platform.selected')
+    ).map(btn => btn.dataset.platform || '');
 
     if (!platforms.length) {
       alert('Please select at least one platform');
@@ -2134,11 +2138,13 @@ function rescheduleQueueItem(id) {
   const dateInput = document.getElementById('schedule-date');
   const timeInput = document.getElementById('schedule-time');
 
-  if (item.schedule_datetime) {
-  const [date, time] = item.schedule_datetime.split(' ');
-  if (dateInput) dateInput.value = date;
-  if (timeInput) timeInput.value = time?.slice(0,5);
-}
+  if (dateInput && !dateInput.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
+  }
 
   if (timeInput && !timeInput.value) {
     timeInput.value = '09:00';
