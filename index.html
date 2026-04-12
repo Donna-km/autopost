@@ -1970,12 +1970,15 @@ function renderQueue(items) {
   grid.innerHTML = items
   .map(item => {
    
-   const title = 
+   const title =
+  item.title ||
   item.caption_instagram ||
   item.caption_tiktok ||
   item.caption_youtube ||
+  item.Caption ||
   item.scene_hint ||
   item.file_name ||
+  item.id ||
   'Untitled';
     const tagText = [
   item.content_type,
@@ -2081,14 +2084,21 @@ function editQueueItem(id) {
   const item = queueItemsData.find(x => String(x.id) === String(id));
   if (!item) return;
 
+  const fallbackCaption =
+    item.Caption ||
+    item.caption ||
+    item.title ||
+    item.file_name ||
+    '';
+
   generatedContent = {
     id: item.id || '',
     file_url: item.file_url || '',
     file_type: item.file_type || '',
     captions: {
-      tiktok: item.caption_tiktok || '',
-      instagram: item.caption_instagram || '',
-      youtube: item.caption_youtube || ''
+      tiktok: item.caption_tiktok || fallbackCaption,
+      instagram: item.caption_instagram || fallbackCaption,
+      youtube: item.caption_youtube || fallbackCaption
     },
     hashtags: item.hashtags || ''
   };
@@ -2125,26 +2135,28 @@ function rescheduleQueueItem(id) {
   const item = queueItemsData.find(x => String(x.id) === String(id));
   if (!item) return;
 
-  // preload data เข้า generatedContent
+  const fallbackCaption =
+    item.Caption ||
+    item.caption ||
+    item.title ||
+    item.file_name ||
+    '';
+
   generatedContent = {
-    id: item.id,
+    id: item.id || '',
     file_url: item.file_url || '',
     file_type: item.file_type || '',
     captions: {
-      tiktok: item.caption_tiktok || '',
-      instagram: item.caption_instagram || '',
-      youtube: item.caption_youtube || ''
+      tiktok: item.caption_tiktok || fallbackCaption,
+      instagram: item.caption_instagram || fallbackCaption,
+      youtube: item.caption_youtube || fallbackCaption
     },
     hashtags: item.hashtags || ''
   };
 
-  // 👉 ไปหน้า existing
   navigateTo('existing');
-
-  // 👉 render preview
   displayExistingResult();
 
-  // 👉 ใส่เวลาเดิมเข้า modal
   setTimeout(() => {
     const dateInput = document.getElementById('schedule-date');
     const timeInput = document.getElementById('schedule-time');
@@ -2152,7 +2164,7 @@ function rescheduleQueueItem(id) {
     if (item.schedule_datetime) {
       const [date, time] = item.schedule_datetime.split(' ');
       if (dateInput) dateInput.value = date;
-      if (timeInput) timeInput.value = time?.slice(0,5);
+      if (timeInput) timeInput.value = time?.slice(0, 5);
     }
 
     openScheduleModal();
