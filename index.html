@@ -1967,7 +1967,9 @@ function renderQueue(items) {
     return;
   }
 
-  grid.innerHTML = items.map(item => {
+  grid.innerHTML = items
+  .map(item => {
+   
    const title = 
   item.caption_instagram ||
   item.caption_tiktok ||
@@ -2067,7 +2069,9 @@ return `
 </div>
       </div>
     `;
-  }).join('');
+  })
+.filter(Boolean)
+.join('');
 
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
