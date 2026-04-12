@@ -563,57 +563,32 @@
     }
 
     // Set initial platform states
-    document.addEventListener('DOMContentLoaded', () => {
+   document.addEventListener('DOMContentLoaded', () => {
   loadContentOptions();
-});
-      // For existing/upload page - make toggleable but keep TikTok and Instagram selected
-      document.querySelectorAll('.existing-platform').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          togglePlatform(e);
-        });
-      });
 
-      // For create page - start all unselected and make toggleable
-      document.querySelectorAll('#page-create .platform-chip').forEach(btn => {
-        btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
-        btn.style.backgroundColor = '';
-        btn.style.color = '';
-        btn.style.borderColor = '';
-        
-        // Add click handler
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          togglePlatform(e);
-        });
-      });
+  document.querySelectorAll('.existing-platform').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePlatform(e);
     });
+  });
 
-    // Store generated content from n8n
-    let generatedContent = null;
-    let queueItemsData = [];
-    let lastFormData = null;
-    let isInlineEditing = false;
-    let inlineEditBackup = null;
-    let generatedPlatforms = [];
+  document.querySelectorAll('#page-create .platform-chip').forEach(btn => {
+    btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
+    btn.style.backgroundColor = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
 
-    // Regenerate content by sending to n8n again
-    async function regenerateExisting(event) {
-  if (!lastFormData) {
-    console.log('No form data to regenerate');
-    return;
-  }
-
-  const submitBtn = event?.target?.closest('button');
-  if (!submitBtn) return;
-
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Regenerating...';
-  submitBtn.disabled = true;
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePlatform(e);
+    });
+  });
 
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
+});
 
   try {
     const response = await fetch('https://primary-production-49d9.up.railway.app/webhook/create-post', {
@@ -676,10 +651,13 @@ formData.append('content_id', contentId);
   console.log('Form payload ready for n8n (multipart):', {
     file_name: selectedFile?.name || '',
     file_type: selectedFile?.type || '',
-    content_type: document.getElementById('existing-content-type')?.value || '',
-    mood_topic: document.getElementById('existing-mood-topic')?.value || '',
-    clip_description: document.getElementById('existing-clip-description')?.value || '',
-    additional_notes: document.getElementById('existing-additional-notes')?.value || '',
+    console.log('Form payload ready for n8n (multipart):', {
+  file_name: selectedFile?.name || '',
+  file_type: selectedFile?.type || '',
+  content_id: contentId,
+  platforms: selectedPlatforms,
+  timestamp: new Date().toISOString()
+});
     platforms: selectedPlatforms,
     timestamp: new Date().toISOString()
   });
