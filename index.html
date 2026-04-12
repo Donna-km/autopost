@@ -147,16 +147,43 @@
           </div><button onclick="clearUpload()" class="p-2 rounded-lg hover:bg-beige transition-colors"> <i data-lucide="x" class="w-5 h-5 text-mocha"></i> </button>
          </div>
         </div><!-- Form Fields -->
-        <div class="grid md:grid-cols-2 gap-6">
-         <div class="flex flex-wrap gap-3"><label class="block text-sm font-medium text-espresso mb-2">Content Type</label> <select id="existing-content-type" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal"> <option value="">Select a type...</option> <option value="walking">Walking / cinematic</option> <option value="grandma">Grandma wisdom</option> <option value="companion">Companion / comforting voice</option> <option value="breath">Breath / pause / grounding</option> <option value="other">Other</option> </select>
-         </div>
-         <div><label class="block text-sm font-medium text-espresso mb-2">Mood / Topic</label> <input type="text" id="existing-mood-topic" placeholder="e.g., gentle morning energy" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
-         </div>
-        </div>
-        <div><label class="block text-sm font-medium text-espresso mb-2">What is happening in this clip?</label> <input type="text" id="existing-clip-description" placeholder="e.g. woman walking in rain from behind" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
-        </div>
-        <div class="mt-6"><label class="block text-sm font-medium text-espresso mb-2">Additional Notes (Optional)</label> <textarea id="existing-additional-notes" placeholder="Any specific details or context for the AI..." rows="3" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none"></textarea>
-        </div><!-- Platform Selection -->
+<div id="old-manual-fields" class="hidden">
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="flex flex-wrap gap-3">
+      <label class="block text-sm font-medium text-espresso mb-2">Content Type</label>
+      <select id="existing-content-type" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+        <option value="">Select a type...</option>
+        <option value="walking">Walking / cinematic</option>
+        <option value="grandma">Grandma wisdom</option>
+        <option value="companion">Companion / comforting voice</option>
+        <option value="breath">Breath / pause / grounding</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-espresso mb-2">Mood / Topic</label>
+      <input type="text" id="existing-mood-topic" placeholder="e.g., gentle morning energy" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-espresso mb-2">What is happening in this clip?</label>
+    <input type="text" id="existing-clip-description" placeholder="e.g. woman walking in rain from behind" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+  </div>
+
+  <div class="mt-6">
+    <label class="block text-sm font-medium text-espresso mb-2">Additional Notes (Optional)</label>
+    <textarea id="existing-additional-notes" placeholder="Any specific details or context for the AI..." rows="3" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal resize-none"></textarea>
+  </div>
+</div>
+
+<div class="mt-6">
+  <label class="block text-sm font-medium text-espresso mb-2">Content Plan</label>
+  <select id="existing-content-id" class="w-full px-4 py-3 rounded-xl border border-sand bg-white text-charcoal">
+    <option value="">Select content...</option>
+  </select>
+</div><!-- Platform Selection -->
         <div class="mt-6"><label class="block text-sm font-medium text-espresso mb-3">Platforms</label>
          <div class="flex flex-wrap gap-3"><button type="button" class="platform-chip existing-platform selected px-4 py-2 rounded-full border border-sand text-sm font-medium flex items-center gap-2 bg-mocha text-white border-mocha hover:opacity-90 transition-opacity" data-platform="tiktok">
            <svg class="w-4 h-4" viewbox="0 0 24 24" fill="currentColor">
@@ -562,30 +589,28 @@
     }
 
     // Set initial platform states
-    document.addEventListener('DOMContentLoaded', () => {
-      // For existing/upload page - make toggleable but keep TikTok and Instagram selected
-      document.querySelectorAll('.existing-platform').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          togglePlatform(e);
-        });
-      });
+   document.addEventListener('DOMContentLoaded', () => {
+  loadContentOptions();
 
-      // For create page - start all unselected and make toggleable
-      document.querySelectorAll('#page-create .platform-chip').forEach(btn => {
-        btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
-        btn.style.backgroundColor = '';
-        btn.style.color = '';
-        btn.style.borderColor = '';
-        
-        // Add click handler
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          togglePlatform(e);
-        });
-      });
+  document.querySelectorAll('.existing-platform').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePlatform(e);
     });
+  });
 
+  document.querySelectorAll('#page-create .platform-chip').forEach(btn => {
+    btn.classList.remove('selected', 'bg-mocha', 'text-white', 'border-mocha');
+    btn.style.backgroundColor = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePlatform(e);
+    });
+  });
+});
     // Store generated content from n8n
     let generatedContent = null;
     let queueItemsData = [];
@@ -646,36 +671,36 @@ async function submitExistingForm(event) {
   }
 
   const selectedPlatforms = Array.from(
-    document.querySelectorAll('.existing-platform.selected')
-  ).map(btn => btn.dataset.platform || '');
+  document.querySelectorAll('.existing-platform.selected')
+).map(btn => btn.dataset.platform || '');
 
- generatedPlatforms = selectedPlatforms;
+generatedPlatforms = selectedPlatforms;
 
-  const formData = new FormData();
-  formData.append('data', selectedFile);
-  formData.append('source', 'upload_media');
-  formData.append('file_name', selectedFile?.name || '');
-  formData.append('file_type', selectedFile?.type || '');
-  formData.append('content_type', document.getElementById('existing-content-type')?.value || '');
-  formData.append('mood_topic', document.getElementById('existing-mood-topic')?.value || '');
-  formData.append('clip_description', document.getElementById('existing-clip-description')?.value || '');
-  formData.append('additional_notes', document.getElementById('existing-additional-notes')?.value || '');
-  formData.append('platforms', JSON.stringify(selectedPlatforms));
-  formData.append('timestamp', new Date().toISOString());
+const contentId = document.getElementById('existing-content-id')?.value || '';
+if (!contentId) {
+  alert('Please select content ID');
+  return;
+}
+
+const formData = new FormData();
+formData.append('data', selectedFile);
+formData.append('source', 'upload_media');
+formData.append('file_name', selectedFile?.name || '');
+formData.append('file_type', selectedFile?.type || '');
+formData.append('content_id', contentId);
+formData.append('platforms', JSON.stringify(selectedPlatforms));
+formData.append('timestamp', new Date().toISOString());
 
   // Store for regenerate
   lastFormData = formData;
 
-  console.log('Form payload ready for n8n (multipart):', {
-    file_name: selectedFile?.name || '',
-    file_type: selectedFile?.type || '',
-    content_type: document.getElementById('existing-content-type')?.value || '',
-    mood_topic: document.getElementById('existing-mood-topic')?.value || '',
-    clip_description: document.getElementById('existing-clip-description')?.value || '',
-    additional_notes: document.getElementById('existing-additional-notes')?.value || '',
-    platforms: selectedPlatforms,
-    timestamp: new Date().toISOString()
-  });
+ console.log('Form payload ready for n8n (multipart):', {
+  file_name: selectedFile?.name || '',
+  file_type: selectedFile?.type || '',
+  content_id: contentId,
+  platforms: selectedPlatforms,
+  timestamp: new Date().toISOString()
+});
 
   const submitBtn = event?.target?.closest('button');
   if (!submitBtn) return;
@@ -2163,6 +2188,28 @@ function rescheduleQueueItem(id) {
     btn.classList.toggle('bg-beige', !isSelected);
     btn.classList.toggle('text-cocoa', !isSelected);
   });
+}
+   async function loadContentOptions() {
+  try {
+    const res = await fetch('https://primary-production-49d9.up.railway.app/webhook/content-plan-list');
+    const data = await res.json();
+
+    const select = document.getElementById('existing-content-id');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Select content...</option>';
+
+    const items = Array.isArray(data) ? data : (data.items || []);
+
+    items.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.content_id || item.id || '';
+      option.textContent = `${item.content_id || item.id || ''} | ${item.Day || ''} | ${item.Emotion || ''} | ${item.Scene || ''}`;
+      select.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Error loading content options:', err);
+  }
 }
    
   </script>
