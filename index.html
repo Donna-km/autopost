@@ -2065,11 +2065,7 @@ function editQueueItem(id) {
     hashtags: item.hashtags || ''
   };
 
-  document.getElementById('existing-content-type').value = item.content_type || '';
-  document.getElementById('existing-mood-topic').value = item.mood_topic || '';
-  document.getElementById('existing-clip-description').value = item.scene_hint || '';
-  document.getElementById('existing-additional-notes').value = '';
-
+  // set selected platforms
   document.querySelectorAll('.existing-platform').forEach(btn => {
     const isSelected = (item.platforms || '').toString().includes(btn.dataset.platform);
     btn.classList.toggle('selected', isSelected);
@@ -2077,6 +2073,12 @@ function editQueueItem(id) {
     btn.classList.toggle('text-white', isSelected);
     btn.classList.toggle('border-mocha', isSelected);
   });
+
+  // set content plan dropdown if available
+  const contentSelect = document.getElementById('existing-content-id');
+  if (contentSelect) {
+    contentSelect.value = item.content_id || '';
+  }
 
   navigateTo('existing');
   displayExistingResult();
