@@ -676,8 +676,8 @@ async function submitExistingForm(event) {
 
 generatedPlatforms = selectedPlatforms;
 
-const contentId = document.getElementById('existing-content-id')?.value || '';
-if (!contentId) {
+const selectedId = document.getElementById('existing-content-id')?.value || '';
+if (!selectedId) {
   alert('Please select content ID');
   return;
 }
@@ -687,17 +687,17 @@ formData.append('data', selectedFile);
 formData.append('source', 'upload_media');
 formData.append('file_name', selectedFile?.name || '');
 formData.append('file_type', selectedFile?.type || '');
-formData.append('content_id', contentId);
+formData.append('id', selectedId);
 formData.append('platforms', JSON.stringify(selectedPlatforms));
 formData.append('timestamp', new Date().toISOString());
 
   // Store for regenerate
   lastFormData = formData;
 
- console.log('Form payload ready for n8n (multipart):', {
+console.log('Form payload ready for n8n (multipart):', {
   file_name: selectedFile?.name || '',
   file_type: selectedFile?.type || '',
-  content_id: contentId,
+  id: selectedId,
   platforms: selectedPlatforms,
   timestamp: new Date().toISOString()
 });
@@ -2054,7 +2054,7 @@ function editQueueItem(id) {
   if (!item) return;
 
   generatedContent = {
-    id: item.id,
+    id: item.id || '',
     file_url: item.file_url || '',
     file_type: item.file_type || '',
     captions: {
@@ -2065,10 +2065,10 @@ function editQueueItem(id) {
     hashtags: item.hashtags || ''
   };
 
-  document.getElementById('existing-content-type').value = item.content_type || '';
-  document.getElementById('existing-mood-topic').value = item.mood_topic || '';
-  document.getElementById('existing-clip-description').value = item.scene_hint || '';
-  document.getElementById('existing-additional-notes').value = '';
+  const contentSelect = document.getElementById('existing-content-id');
+  if (contentSelect) {
+    contentSelect.value = item.id || '';
+  }
 
   document.querySelectorAll('.existing-platform').forEach(btn => {
     const isSelected = (item.platforms || '').toString().includes(btn.dataset.platform);
@@ -2081,7 +2081,6 @@ function editQueueItem(id) {
   navigateTo('existing');
   displayExistingResult();
 }
-
 function openQueueItem(id) {
   editQueueItem(id);
 }
@@ -2203,8 +2202,8 @@ function rescheduleQueueItem(id) {
 
     items.forEach(item => {
       const option = document.createElement('option');
-      option.value = item.content_id || item.id || '';
-      option.textContent = `${item.content_id || item.id || ''} | ${item.Day || ''} | ${item.Emotion || ''} | ${item.Scene || ''}`;
+     option.value = item.id || '';
+     option.textContent = `${item.id || ''} | ${item.Day || ''} | ${item.Emotion || ''} | ${item.Scene || ''}`;
       select.appendChild(option);
     });
   } catch (err) {
