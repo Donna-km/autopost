@@ -1535,59 +1535,110 @@ function setInlineButtonsEditing(editing) {
     }
 
     function applyQueueFilters() {
-      const cards = document.querySelectorAll('.queue-card');
-      let visibleCount = 0;
+  const cards = document.querySelectorAll('.queue-card');
+  let visibleCount = 0;
 
-      cards.forEach((card, index) => {
-        const item = queueData[index];
-        if (!item) return;
+  cards.forEach((card, index) => {
+    const item = queueItemsData[index];
+    if (!item) return;
 
-        let matches = true;
+    let matches = true;
 
-        // Filter by platform
-        if (queueFilters.platform !== 'all') {
-          matches = matches && item.platforms.includes(queueFilters.platform);
+    const rawStatus = String(item.status || '').trim().toLowerCase();
+
+    // Filter by platform
+    if (queueFilters.platform !== 'all') {
+      const platforms = (item.platforms || '')
+        .toString()
+        .replace(/[\[\]"]/g, '')
+        .split(',')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      matches = matches && platforms.includes(queueFilters.platform);
+    }
+
+    // Filter by status
+    if (queueFilters.status === 'all') {
+      matches = matches && rawStatus !== 'draft';
+    } else {
+      matches = matches && rawStatus === queueFilters.status;
+    }
+
+    // Filter by type
+    if (queueFilters.type !== 'all') {
+      matches = matches && item.content_type === queueFilters.type;
+    }
+
+    // Filter by time
+    if (queueFilters.time !== 'all') {
+      let itemDate = null;
+
+      if (item.schedule_datetime) {
+        const datePart = String(item.schedule_datetime).split(' ')[0];
+        itemDate = new Date(datePart);
+      }
+
+      if (itemDate && !Number.isNaN(itemDate.getTime())) {
+        itemDate.setHours(0, 0, 0, 0);
+
+        if (queueFilters.time === 'today') {
+          matches = matches && itemDate.getTime() === today.getTime();
+        } else if (queueFilters.time === 'week') {
+          const startOfWeek = new Date(today);
+          const day = startOfWeek.getDay();
+          const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+          startOfWeek.setDate(diff);
+          startOfWeek.setHours(0, 0, 0, 0);
+
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+          matches = matches && itemDate >= startOfWeek && itemDate < endOfWeek;
+        } else if (queueFilters.time === 'month') {
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+          matches = matches && itemDate >= startOfMonth && itemDate < endOfMonth;
         }
-
-        // Filter by status
-if (queueFilters.status === 'all') {
-  // ❌ ซ่อน draft ตอน All Status
-  matches = matches && item.status !== 'draft';
-} else {
-  matches = matches && item.status === queueFilters.status;
-}
-
-        // Filter by type
-        if (queueFilters.type !== 'all') {
-          matches = matches && item.type === queueFilters.type;
-        }
-
-        // Filter by time
-        matches = matches && isDateInRange(item.date);
-
-        // Filter by search
-        if (queueFilters.search) {
-          matches = matches && item.title.toLowerCase().includes(queueFilters.search.toLowerCase());
-        }
-
-        if (matches) {
-          card.style.display = '';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      // Show/hide no results message
-      const noResults = document.getElementById('queue-no-results');
-      if (noResults) {
-        if (visibleCount === 0) {
-          noResults.style.display = '';
-        } else {
-          noResults.style.display = 'none';
-        }
+      } else {
+        matches = false;
       }
     }
+
+    // Filter by search
+    if (queueFilters.search) {
+      const searchText = [
+        item.title,
+        item.caption_instagram,
+        item.caption_tiktok,
+        item.caption_youtube,
+        item.Caption,
+        item.scene_hint,
+        item.file_name,
+        item.id
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      matches = matches && searchText.includes(queueFilters.search.toLowerCase());
+    }
+
+    if (matches) {
+      card.style.display = '';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  const noResults = document.getElementById('queue-no-results');
+  if (noResults) {
+    noResults.style.display = visibleCount === 0 ? '' : 'none';
+  }
+}    
+}
 
     // Set up filter event listeners (will be called after DOM loads)
     function setupQueueFilters() {
@@ -2093,6 +2144,7 @@ return `
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
+ applyQueueFilters();
 }
 function editQueueItem(id) {
   const item = queueItemsData.find(x => String(x.id) === String(id));
