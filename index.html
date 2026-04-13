@@ -1958,7 +1958,7 @@ function renderQueue(items) {
   const grid = document.getElementById('queue-grid');
   if (!grid) return;
 
-  items = items.filter(item => (item.status || '').toLowerCase() !== 'draft');
+ 
   queueItemsData = items;
 
   if (!items.length) {
