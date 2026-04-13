@@ -1992,14 +1992,14 @@ if ((item.status || '').toLowerCase() === 'draft') return '';
 // normalize status
 const rawStatus = (item.status || '').toLowerCase();
 
-let status = 'draft_to_post';
+let status = 'draft'; // 👈 default เป็น draft ไปเลย
 
 if (rawStatus === 'scheduled') {
   status = 'scheduled';
 } else if (rawStatus === 'posted') {
   status = 'posted';
-} else if (rawStatus === 'draft_to_post') {
-  status = 'draft_to_post';
+} else if (rawStatus === 'draft' || rawStatus === 'draft_to_post') {
+  status = 'draft'; // 👈 รวมให้เป็น draft
 } else if (item.schedule_datetime) {
   status = 'scheduled';
 }
