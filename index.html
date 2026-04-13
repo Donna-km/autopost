@@ -1990,7 +1990,9 @@ function renderQueue(items) {
 .filter(Boolean)
 .join(' • ');
     // ❌ ซ่อน draft ไปเลย
-if ((item.status || '').toLowerCase() === 'draft') return '';
+// ❌ ซ่อน draft ออกจาก Content Queue
+const hiddenStatuses = ['draft', 'draft_to_post'];
+if (hiddenStatuses.includes((item.status || '').toLowerCase())) return '';
 
 // normalize status
 const rawStatus = (item.status || '').toLowerCase();
