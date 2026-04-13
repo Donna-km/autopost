@@ -1998,20 +1998,22 @@ function renderQueue(items) {
 .join(' • ');
     // ❌ ซ่อน draft ไปเลย
 // ❌ ซ่อน draft ออกจาก Content Queue
-const hiddenStatuses = ['draft', 'draft_to_post'];
+const hiddenStatuses = ['draft'];
 if (hiddenStatuses.includes((item.status || '').toLowerCase())) return '';
 
 // normalize status
 const rawStatus = (item.status || '').toLowerCase();
 
-let status = 'draft'; // 👈 default เป็น draft ไปเลย
+let status = rawStatus || 'draft';
 
 if (rawStatus === 'scheduled') {
   status = 'scheduled';
 } else if (rawStatus === 'posted') {
   status = 'posted';
-} else if (rawStatus === 'draft' || rawStatus === 'draft_to_post') {
-  status = 'draft'; // 👈 รวมให้เป็น draft
+} else if (rawStatus === 'draft_to_post') {
+  status = 'draft_to_post'; // 👈 แยกให้ชัด
+} else if (rawStatus === 'draft') {
+  status = 'draft';
 } else if (item.schedule_datetime) {
   status = 'scheduled';
 }
