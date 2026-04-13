@@ -1999,10 +1999,10 @@ function renderQueue(items) {
     // ❌ ซ่อน draft ไปเลย
 // ❌ ซ่อน draft ออกจาก Content Queue
 const hiddenStatuses = ['draft'];
-if (hiddenStatuses.includes((item.status || '').toLowerCase())) return '';
+if (hiddenStatuses.includes(String(item.Status || item.status || '').toLowerCase())) return '';
 
 // normalize status
-const rawStatus = (item.status || '').toLowerCase();
+const rawStatus = String(item.Status || item.status || '').toLowerCase();
 
 let status = rawStatus || 'draft';
 
