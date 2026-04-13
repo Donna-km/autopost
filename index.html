@@ -1539,7 +1539,7 @@ function setInlineButtonsEditing(editing) {
       let visibleCount = 0;
 
       cards.forEach((card, index) => {
-        const item = queueData[index];
+        const item = queueItemsData[index];
         if (!item) return;
 
         let matches = true;
@@ -1550,11 +1550,12 @@ function setInlineButtonsEditing(editing) {
         }
 
         // Filter by status
+const rawStatus = String(item.status || '').trim().toLowerCase();
+
 if (queueFilters.status === 'all') {
-  // ❌ ซ่อน draft ตอน All Status
-  matches = matches && item.status !== 'draft';
+  matches = matches && rawStatus !== 'draft';
 } else {
-  matches = matches && item.status === queueFilters.status;
+  matches = matches && rawStatus === queueFilters.status;
 }
 
         // Filter by type
@@ -2001,17 +2002,19 @@ function renderQueue(items) {
 const hiddenStatuses = ['draft'];
 if (hiddenStatuses.includes((item.status || '').toLowerCase())) return '';
 
-// normalize status
-const rawStatus = (item.status || '').toLowerCase();
+const rawStatus = String(item.status || '').trim().toLowerCase();
+
+// ซ่อนเฉพาะ draft
+if (rawStatus === 'draft') return '';
 
 let status = rawStatus || 'draft';
 
-if (rawStatus === 'scheduled') {
+if (rawStatus === 'schedule' || rawStatus === 'scheduled') {
   status = 'scheduled';
 } else if (rawStatus === 'posted') {
   status = 'posted';
 } else if (rawStatus === 'draft_to_post') {
-  status = 'draft_to_post'; // 👈 แยกให้ชัด
+  status = 'draft_to_post';
 } else if (rawStatus === 'draft') {
   status = 'draft';
 } else if (item.schedule_datetime) {
