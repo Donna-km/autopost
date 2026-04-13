@@ -1543,9 +1543,12 @@ function setInlineButtonsEditing(editing) {
         }
 
         // Filter by status
-        if (queueFilters.status !== 'all') {
-          matches = matches && item.status === queueFilters.status;
-        }
+if (queueFilters.status === 'all') {
+  // ❌ ซ่อน draft ตอน All Status
+  matches = matches && item.status !== 'draft';
+} else {
+  matches = matches && item.status === queueFilters.status;
+}
 
         // Filter by type
         if (queueFilters.type !== 'all') {
