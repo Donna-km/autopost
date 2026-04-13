@@ -1515,9 +1515,16 @@ function setInlineButtonsEditing(editing) {
         case 'today':
           return d.getTime() === today.getTime();
         case 'week':
-          const weekEnd = new Date(today);
-          weekEnd.setDate(weekEnd.getDate() + 7);
-          return d >= today && d < weekEnd;
+  const startOfWeek = new Date(today);
+  const day = startOfWeek.getDay(); // 0=Sun, 1=Mon...
+  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // เริ่ม Monday
+
+  startOfWeek.setDate(diff);
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+  return d >= startOfWeek && d < endOfWeek;
         case 'month':
           const monthEnd = new Date(today);
           monthEnd.setMonth(monthEnd.getMonth() + 1);
