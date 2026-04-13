@@ -1527,13 +1527,78 @@ function setInlineButtonsEditing(editing) {
       }
     }
 
-    function applyQueueFilters() {
-      const cards = document.querySelectorAll('.queue-card');
-      let visibleCount = 0;
+   function applyQueueFilters() {
+  const cards = document.querySelectorAll('.queue-card');
+  let visibleCount = 0;
 
-      cards.forEach((card, index) => {
-        const item = queueData[index];
-        if (!item) return;
+  cards.forEach((card, index) => {
+    const item = queueItemsData[index];
+    if (!item) return;
+
+    const rawStatus = (item.status || '').toLowerCase();
+    let normalizedStatus = 'draft';
+
+    if (rawStatus === 'scheduled') {
+      normalizedStatus = 'scheduled';
+    } else if (rawStatus === 'posted') {
+      normalizedStatus = 'posted';
+    } else if (rawStatus === 'draft' || rawStatus === 'draft_to_post') {
+      normalizedStatus = 'draft';
+    } else if (item.schedule_datetime) {
+      normalizedStatus = 'scheduled';
+    }
+
+    let matches = true;
+
+    // platform
+    if (queueFilters.platform !== 'all') {
+      const platforms = (item.platforms || '')
+        .toString()
+        .replace(/[\[\]"]/g, '')
+        .split(',')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      matches = matches && platforms.includes(queueFilters.platform);
+    }
+
+    // status
+    if (queueFilters.status === 'all') {
+      matches = matches && normalizedStatus !== 'draft';
+    } else {
+      matches = matches && normalizedStatus === queueFilters.status;
+    }
+
+    // type
+    if (queueFilters.type !== 'all') {
+      matches = matches && item.content_type === queueFilters.type;
+    }
+
+    // search
+    if (queueFilters.search) {
+      const title = (
+        item.title ||
+        item.caption_instagram ||
+        item.caption_tiktok ||
+        item.caption_youtube ||
+        item.Caption ||
+        item.scene_hint ||
+        item.file_name ||
+        item.id ||
+        ''
+      ).toLowerCase();
+
+      matches = matches && title.includes(queueFilters.search.toLowerCase());
+    }
+
+    if (matches) {
+      card.style.display = '';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
 
         let matches = true;
 
@@ -1949,6 +2014,7 @@ async function postNow() {
 
     const items = Array.isArray(data) ? data : (data.items || []);
     renderQueue(items);
+applyQueueFilters();
   } catch (err) {
     console.error('Error loading queue:', err);
   }
@@ -1990,7 +2056,8 @@ function renderQueue(items) {
 .filter(Boolean)
 .join(' • ');
     // ❌ ซ่อน draft ไปเลย
-if ((item.status || '').toLowerCase() === 'draft') return '';
+const rawStatusCheck = (item.status || '').toLowerCase();
+if (rawStatusCheck === 'draft' || rawStatusCheck === 'draft_to_post') return '';
 
 // normalize status
 const rawStatus = (item.status || '').toLowerCase();
